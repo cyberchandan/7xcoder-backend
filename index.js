@@ -21,6 +21,7 @@ const transporter = nodemailer.createTransport({
 
 // routes
 app.post('/api/contact', async (req, res) => {
+    
     try {
         const { name, email, message } = req.body
 
@@ -43,7 +44,9 @@ app.post('/api/contact', async (req, res) => {
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: "Email failed ❌" })
+
     }
+    res.send("Contact API working ✅");
 })
 
 const port = 3000
