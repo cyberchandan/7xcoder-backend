@@ -28,8 +28,8 @@ app.post('/api/contact', async (req, res) => {
     console.log("SMTP Ready")
 
     const mailOptions = {
-      from: `"7xcoder Contact" <${process.env.EMAIL_USER}>`,
-      to: "vertualchandan@gmail.com",
+      from: `"7xcoder Contact" <vertualchandan@gmail.com>`,
+      to: "chandan36024@gmail.com",
       replyTo: email,
       subject: `7xcoder Contact Form Message from ${name}`,
       html: `
@@ -39,6 +39,7 @@ app.post('/api/contact', async (req, res) => {
         <p><strong>Message:</strong> ${message}</p>
       `,
     }
+    
 
     await transporter.sendMail(mailOptions)
 
