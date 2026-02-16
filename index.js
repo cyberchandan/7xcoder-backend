@@ -1,58 +1,59 @@
 const express = require('express')
-const app = express()
 const cors = require('cors')
-const nodemailer = require('nodemailer')
+const axios = require('axios')
 require('dotenv').config()
 
-// middleware
+const app = express()
+
 app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(cors())
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: Number(process.env.EMAIL_PORT),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-})
+app.use(cors({
+  origin: ["https://7xcoder.com"],
+  methods: ["POST"]
+}))
 
-// routes
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, message } = req.body
 
-    await transporter.verify()
-    console.log("SMTP Ready")
-
-    const mailOptions = {
-      from: `"7xcoder Contact" <vertualchandan@gmail.com>`,
-      to: "chandan36024@gmail.com",
-      replyTo: email,
-      subject: `7xcoder Contact Form Message from ${name}`,
-      html: `
-        <h3>7xcoder.com Contact Message</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Message:</strong> ${message}</p>
-      `,
-    }
-    
-
-    await transporter.sendMail(mailOptions)
+    await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: "7xcoder Contact",
+          email: "vertualchandan@gmail.com"
+        },
+        to: [
+          { email: "chandan36024@gmail.com" }
+        ],
+        replyTo: {
+          email: email
+        },
+        subject: `7xcoder Contact Form Message from ${name}`,
+        htmlContent: `
+          <h3>7xcoder.com Contact Message</h3>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Message:</strong> ${message}</p>
+        `
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json"
+        }
+      }
+    )
 
     res.json({ message: "Email sent successfully 🚀" })
 
   } catch (error) {
-    console.error("MAIL ERROR:", error)
+    console.error("BREVO ERROR:", error.response?.data || error.message)
     res.status(500).json({ message: "Email failed ❌" })
   }
 })
 
-const port = process.env.PORT || 3000
-
+const port = process.env.PORT || 10000
 app.listen(port, () => {
-  console.log(`server running on ${port} port`)
+  console.log(`Server running on port ${port}`)
 })
